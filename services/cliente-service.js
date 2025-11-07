@@ -45,11 +45,20 @@ module.exports = class ClienteService {
       );
       let clientes = await clienteCollection.find().getDocuments();
       clientes.forEach((element) => {
+        let content = element.getContent();
+        if (Buffer.isBuffer(content)) {
+          try {
+            content = JSON.parse(content.toString("utf-8"));
+          } catch (error) {
+            console.error("Error parsing document content:", error);
+            content = {};
+          }
+        }
         result.push({
           id: element.key,
           createdOn: element.createdOn,
           lastModified: element.lastModified,
-          ...element.getContent(),
+          ...content,
         });
       });
     } catch (err) {
@@ -77,11 +86,20 @@ module.exports = class ClienteService {
         CLIENTES_COLLECTION
       );
       cliente = await clientesCollection.find().key(clienteId).getOne();
+      let content = cliente.getContent();
+      if (Buffer.isBuffer(content)) {
+        try {
+          content = JSON.parse(content.toString("utf-8"));
+        } catch (error) {
+          console.error("Error parsing document content:", error);
+          content = {};
+        }
+      }
       result = {
         id: cliente.key,
         createdOn: cliente.createdOn,
         lastModified: cliente.lastModified,
-        ...cliente.getContent(),
+        ...content,
       };
     } catch (err) {
       console.error(err);
